@@ -8,25 +8,54 @@ using Accord.Video.FFMPEG;
 using System.IO;
 using System.Numerics;
 using System.Drawing.Imaging;
+
 namespace MovieTest
 {
     public class ClassMovieMaker
     {
-        String dataFile; int width; int height; Boolean adults; String blueType;
+        String dataFile; int width; int height; Boolean adults;
+
+        //String blueType;
+        String colorTypeDesc;
+        Color colorType;
+        Color colorOtherType;
         Boolean rotate = true;
-        double triangleBaseLength = .345;
-        double triangleHeight = .95;
-        double triangleBorderWidth = 10;
+        double triangleBaseLength = (.345) / 2;// .345;
+        double triangleHeight = (.95) / 2;//.95;
+        double triangleBorderWidth = 5;//10;
         double circleHeadRadius = .16;
         double nameFontW = .12;
         int multBy = 100;
         String outDir = "D://MOVIES//";
-        double fileDurSecs = 60 * 60;// 60;
+        double fileDurSecs = 60 * 60;// 60 * 15;// 60 * 60;// 60;
         Boolean started = false;
         int part = 1;
         int linePos = 0;
         String[] prevLine = null;
+        List<String> fileNames = new List<string>();
 
+        public ClassMovieMaker(String dirTo, String fileName, String d, int w, int h, Boolean t, String ctd, Color ct, Boolean r)
+        {
+            outDir = dirTo;
+            rotate = r;
+            dataFile = d;
+            width = w * multBy;
+            height = h * multBy;
+            adults = t;
+            colorTypeDesc = ctd;
+            colorOtherType = ct == Color.Red ? Color.Blue : Color.Red;
+            colorType = ct;
+            StreamReader sr = new StreamReader(dataFile);
+            {
+                sr.ReadLine();
+                while ((!sr.EndOfStream))
+                {
+                   ClassMovieMaker2(fileName, ref sr); 
+                }
+            }
+            sr.Close();
+             
+        }
         public ClassMovieMaker(String dirTo, String fileName, String d, int w, int h, Boolean t, String b, Boolean r)
         {
             outDir = dirTo;
@@ -35,34 +64,29 @@ namespace MovieTest
             width = w * multBy;
             height = h * multBy;
             adults = t;
-            blueType = b;
-            using (StreamReader sr = new StreamReader(dataFile))
+            colorType =Color.Blue;
+            colorTypeDesc = b;
+            colorOtherType = Color.Red;
+            //blueType = b;
+            //using (
+            StreamReader sr = new StreamReader(dataFile);//)
             {
                 sr.ReadLine();
                 while ((!sr.EndOfStream))
                 {
-                    ClassMovieMaker2("PREVAM_01_30_2019RLPART", sr);// "PLEAP_01_23_2019RLPARTS", sr);
+                    ClassMovieMaker2("PLEAP_02_20_2019RLPART", ref sr);// "PLEAP_01_23_2019RLPARTS", sr);
                 }
             }
-
+            sr.Close();
 
         }
-         
 
-        public void ClassMovieMaker2(String fileName, StreamReader sr)
+
+        public void ClassMovieMaker2(String fileName, ref StreamReader sr)
         {
-
-
-
             DateTime currentTime = new DateTime();
             Dictionary<String, String[]> personPos = new Dictionary<string, string[]>();
-
-
-
-
             double fileDur = 0;
-
-
             VideoFileWriter vFWriter = new VideoFileWriter();
 
             try
@@ -71,10 +95,8 @@ namespace MovieTest
                 int random = new Random().Next();
                 String outputFileName = outDir + fileName + (rotate ? "" : "NO") + random + "ROTATE__fr_" + framRate + "_PART" + part + ".avi";
                 vFWriter.Open(outputFileName, width, height, framRate, VideoCodec.MPEG4);
-                
                 {
                     linePos++;
-                     
                     if (prevLine != null)
                     {
                         if (!personPos.ContainsKey(prevLine[0]))
@@ -85,11 +107,9 @@ namespace MovieTest
                     while ((!sr.EndOfStream))
                     {
                         String[] line = sr.ReadLine().Split(',');
-
                         if (line.Length > 4)
                         {
                             DateTime lineTime = DateTime.Parse(line[1]);
-
                             if (!started)
                             {
                                 currentTime = lineTime;
@@ -97,13 +117,11 @@ namespace MovieTest
                             }
                             if (lineTime.CompareTo(currentTime) != 0 || lineTime.Millisecond != currentTime.Millisecond)
                             {
-                                //if ( numberOfFramesReached >= numberOfFramesStart)
                                 drawTriangles(personPos, ref vFWriter, currentTime);
                                 personPos = new Dictionary<string, string[]>();
 
                                 if (fileDur > fileDurSecs)
                                 {
-
                                     fileDur = 0;
                                     vFWriter.Close();
                                     part++;
@@ -113,25 +131,24 @@ namespace MovieTest
 
                                 fileDur += .1;
                                 currentTime = lineTime;
-
-
                             }
 
                             if (!personPos.ContainsKey(line[0]))
                                 personPos.Add(line[0], line);
-
                         }
                     }
 
-                }
+;                }
+                fileNames.Add(outputFileName);
 
             }
             catch (Exception e)
             {//24355 75000 6506
-                //linePos = linePos;
+                 linePos = linePos;
+                
             }
 
-            vFWriter.Close();
+            
 
         }
        
@@ -279,21 +296,24 @@ namespace MovieTest
             Boolean adult = isAdult(name);
             //float namePos = ph.X - 35;
 
+            Brush color1 = colorType == Color.Blue ? Brushes.Blue : Brushes.Red;
+            Brush color2 = colorType != Color.Blue ? Brushes.Blue : Brushes.Red;
+
             if ((!adult) || adults)
             {
                 //g.DrawLine(new Pen(Color.DarkGray, 20), pl, pr);
                 //(adult ? Brushes.Green : line[6].Trim() == blueType ? Brushes.Blue : Brushes.Red)
                 //g.DrawString("L", new Font("Times New Roman", 14.0f), Brushes.Black, pl.X, pl.Y + 5);
                 //g.DrawString("R", new Font("Times New Roman", 14.0f), Brushes.Black, pr.X, pr.Y + 5);
-                Pen pen = new Pen((adult ? Color.Green : line[6].Trim() == blueType ? Color.Blue : Color.Red), (float)triangleBorderWidth);
-                Brush brush = (adult ? Brushes.Green : line[6].Trim() == blueType ? Brushes.Blue : Brushes.Red);
+                Pen pen = new Pen((adult ? Color.Green : line[6].Trim() == colorTypeDesc ? colorType : colorOtherType), (float)triangleBorderWidth);
+                Brush brush = (adult ? Brushes.Green : line[6].Trim() == colorTypeDesc ? color1 : color2);
 
                 g.DrawPolygon(pen , new PointF[] { pl, pt, pr, pm });
                 g.DrawString(name, new Font("Times New Roman", 16.0f, FontStyle.Bold), Brushes.Black, pn.X  , pn.Y  );
                 //g.FillEllipse(brush, ph.X, ph.Y, (float)(circleHeadRadius * 200), (float)(circleHeadRadius * 200));
                 if (talking)
                 {
-                    g.FillPolygon((adult ? Brushes.Green : line[6].Trim() == blueType ? Brushes.Blue : Brushes.Red) , new PointF[] { pl, pt, pr, pm });
+                    g.FillPolygon((adult ? Brushes.Green : line[6].Trim() == colorTypeDesc ? color1 : color2) , new PointF[] { pl, pt, pr, pm });
                 }
             } 
         }
