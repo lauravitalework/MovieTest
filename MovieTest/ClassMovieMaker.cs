@@ -14,26 +14,31 @@ namespace MovieTest
     public class ClassMovieMaker
     {
         String dataFile; int width; int height; Boolean adults;
-
+         
         //String blueType;
         String colorTypeDesc;
         Color colorType;
         Color colorOtherType;
         Boolean rotate = true;
         double triangleBaseLength = (.345) / 2;// .345;
-        double triangleHeight = (.95) / 2;//.95;
+        double triangleHeight = (1.10) / 2;//.95;
         double triangleBorderWidth = 5;//10;
         double circleHeadRadius = .16;
         double nameFontW = .12;
         int multBy = 100;
-        String outDir = "D://MOVIES//";
+        String outDir = "E://MOVIES//";
         double fileDurSecs = 60 * 60;// 60 * 15;// 60 * 60;// 60;
         Boolean started = false;
         int part = 1;
         int linePos = 0;
         String[] prevLine = null;
         List<String> fileNames = new List<string>();
-
+        public String szfileNames = "";
+         
+        int random = new Random().Next();
+        public ClassMovieMaker( )
+        {
+        }
         public ClassMovieMaker(String dirTo, String fileName, String d, int w, int h, Boolean t, String ctd, Color ct, Boolean r)
         {
             outDir = dirTo;
@@ -45,6 +50,9 @@ namespace MovieTest
             colorTypeDesc = ctd;
             colorOtherType = ct == Color.Red ? Color.Blue : Color.Red;
             colorType = ct;
+            random = new Random().Next();
+             //ffmpeg -i "concat:input1.avi|input2.avi|input3.avi" -c copy output.avi
+            
             StreamReader sr = new StreamReader(dataFile);
             {
                 sr.ReadLine();
@@ -88,12 +96,12 @@ namespace MovieTest
             Dictionary<String, String[]> personPos = new Dictionary<string, string[]>();
             double fileDur = 0;
             VideoFileWriter vFWriter = new VideoFileWriter();
-
+            var framRate = 40;
             try
             {
-                var framRate = 40;
-                int random = new Random().Next();
+                szfileNames = szfileNames + (szfileNames == "" ? "" : "|") + fileName + (rotate ? "" : "NO") + random + "ROTATE__fr_40_PART" + part + ".avi";
                 String outputFileName = outDir + fileName + (rotate ? "" : "NO") + random + "ROTATE__fr_" + framRate + "_PART" + part + ".avi";
+                  
                 vFWriter.Open(outputFileName, width, height, framRate, VideoCodec.MPEG4);
                 {
                     linePos++;
@@ -177,8 +185,77 @@ namespace MovieTest
         {
             return getTrianglePoints(line, triangleBaseLength);
         }
-
         public Tuple<PointF, PointF, PointF, PointF, PointF, PointF, PointF> getTrianglePoints(String[] line, double tb)
+        {
+            /*xc = (xl+xr)/2;
+yc = (yl+yr)/2;
+dx = (xr-xl)/2;
+dy = (yr-yl)/2;
+
+m = sqrt(dx*dx+dy*dy);
+rescale = (new_distance*0.5)/m;
+
+new_xl = xc - dx*rescale;
+new_xr = xc + dx*rescale;
+
+new_yl = yc - dy*rescale;
+new_yr = yc + dy*rescale;*/
+
+            //LEFT
+            float xl = float.Parse(line[11]);
+            float yl = float.Parse(line[12]);
+            PointF pl = new PointF(xl, yl);
+
+
+            //RIGHT
+            float xr = float.Parse(line[9]);
+            float yr = float.Parse(line[10]);
+            PointF pr = new PointF(xr, yr);
+
+            //CENTER
+
+            float xc = (xl + xr) / 2;
+            float yc = (yl + yr) / 2;
+            PointF pc = new PointF(xc, yc);
+
+            float dx = (xr - xl) / 2;
+            float dy = (yr - yl) / 2;
+
+            double m = Math.Sqrt(dx * dx + dy * dy);
+            float rescale = (float)((tb * 0.5) / m);
+
+            float new_xl = xc - dx * rescale;
+            float new_xr = xc + dx * rescale;
+
+            float new_yl = yc - dy * rescale;
+            float new_yr = yc + dy * rescale;
+
+            PointF pln = new PointF((float)new_xl, (float)new_yl);
+            PointF prn = new PointF((float)new_xr, (float)new_yr);
+            //{X = 2 Y = 3}-----{X = 1.14644659 Y = 3.8535533}
+            //{X = 1 Y = 4} ---- {X = 1.85355341 Y = 3.1464467}
+            ////left { X = 2 Y = 3}  ----- 1.67677665,3.32322335
+            //right {X = 1 Y = 4} ---- 1.32322335,3.67677665
+            //center {X = 1.5 Y = 3.5}
+            //top {X = 1.11109126 Y = 3.11109138}
+            //head {X = 0.9979542 Y = 2.99795413}
+
+            //TOP
+            PointF pt = getTriangleHead(pln, prn, pc, triangleHeight);
+
+            //HEAD
+            PointF ph = getTriangleHead(pln, prn, pc, triangleHeight + circleHeadRadius);
+
+            //NAME
+            PointF pn = getTriangleHead(pln, prn, pc, (triangleHeight / 2));
+
+            //MIDDLE
+            PointF pm = getTriangleHead(pln, prn, pc, (triangleHeight / 4));
+
+            return new Tuple<PointF, PointF, PointF, PointF, PointF, PointF, PointF>(pln, prn, pc, pt, ph, pn, pm);
+
+        }
+        public Tuple<PointF, PointF, PointF, PointF, PointF, PointF, PointF> getTrianglePoints1(String[] line, double tb)
         {
             float x = float.Parse(line[2]);
             float y = float.Parse(line[3]);
@@ -205,8 +282,7 @@ namespace MovieTest
             float xln = (float)(xc - tb * (Math.Sqrt(1 / (1 + (m * m)))));
             float yln = (float)(yc - (m * tb) * (Math.Sqrt(1 / (1 + (m * m)))));
             PointF pln = new PointF((float)xln, (float)yln);
-
-
+          
             //NEW RIGHT
             float xrn = (float)(xc + tb * (Math.Sqrt(1 / (1 + (m * m)))));
             float yrn = (float)(yc + (m * tb) * (Math.Sqrt(1 / (1 + (m * m)))));
@@ -309,13 +385,14 @@ namespace MovieTest
                 Brush brush = (adult ? Brushes.Green : line[6].Trim() == colorTypeDesc ? color1 : color2);
 
                 g.DrawPolygon(pen , new PointF[] { pl, pt, pr, pm });
-                g.DrawString(name, new Font("Times New Roman", 16.0f, FontStyle.Bold), Brushes.Black, pn.X  , pn.Y  );
                 //g.FillEllipse(brush, ph.X, ph.Y, (float)(circleHeadRadius * 200), (float)(circleHeadRadius * 200));
                 if (talking)
                 {
                     g.FillPolygon((adult ? Brushes.Green : line[6].Trim() == colorTypeDesc ? color1 : color2) , new PointF[] { pl, pt, pr, pm });
                 }
-            } 
+                g.DrawString(name, new Font("Times New Roman", 16.0f, FontStyle.Bold), Brushes.Black, pn.X, pn.Y);
+
+            }
         }
   
         public Boolean isAdult(String k)
