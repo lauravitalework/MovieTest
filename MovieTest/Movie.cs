@@ -8,14 +8,21 @@ using Accord.Video.FFMPEG;
 using System.IO;
 using System.Numerics;
 using System.Drawing.Imaging;
-
 namespace MovieTest
 {
-    public class ClassMovieMaker
+    public class Movie
     {
-        String dataFile; int width; int height; Boolean adults;
-         
-        //String blueType;
+        public String[] szDays;
+        public String version = "";
+        public String cotalkVersion = "";
+        public String cotalkDir = "";
+        String outDir = "E://MOVIES//";
+
+
+        public int width;
+        public int height;
+        public Boolean adults;
+
         String colorTypeDesc;
         Color colorType;
         Color colorOtherType;
@@ -26,7 +33,7 @@ namespace MovieTest
         double circleHeadRadius = .16;
         double nameFontW = .12;
         int multBy = 100;
-        String outDir = "E://MOVIES//";
+         
         double fileDurSecs = 60 * 60;// 60 * 15;// 60 * 60;// 60;
         Boolean started = false;
         int part = 1;
@@ -34,62 +41,43 @@ namespace MovieTest
         String[] prevLine = null;
         List<String> fileNames = new List<string>();
         public String szfileNames = "";
-         
+
         int random = new Random().Next();
-        public ClassMovieMaker( )
+
+
+        public Movie(String[] szDays1, String cotalkVersion1, String cotalkDir1,String movieDir,String d, int w, int h, Boolean t, String ctd, Color ct, Boolean r)
         {
-        }
-        public ClassMovieMaker(String dirTo, String fileName, String d, int w, int h, Boolean t, String ctd, Color ct, Boolean r)
-        {
-            outDir = dirTo;
+            szDays = szDays1;
+            cotalkVersion = cotalkVersion1;
+            cotalkDir = cotalkDir1;
+
+            outDir = movieDir;
             rotate = r;
-            dataFile = d;
             width = w * multBy;
             height = h * multBy;
             adults = t;
             colorTypeDesc = ctd;
             colorOtherType = ct == Color.Red ? Color.Blue : Color.Red;
-            colorType = ct;
-            random = new Random().Next();
-             //ffmpeg -i "concat:input1.avi|input2.avi|input3.avi" -c copy output.avi
-            
-            StreamReader sr = new StreamReader(dataFile);
+            colorType = ct; 
+            version = DateTime.Now.Month.ToString().ToString() + DateTime.Now.Day.ToString() + DateTime.Now.Year.ToString()+"_"+random;
+
+
+            foreach (String day in szDays)
             {
-                sr.ReadLine();
-                while ((!sr.EndOfStream))
+                String dataFile = cotalkDir + "DAYCOTALK_" + Program.szDay(day) + version + ".CSV";
+                StreamReader sr = new StreamReader(dataFile);
                 {
-                   ClassMovieMaker2(fileName, ref sr); 
+                    sr.ReadLine();
+                    while ((!sr.EndOfStream))
+                    {
+                       // ClassMovieMaker2(fileName, ref sr);
+                    }
                 }
+                sr.Close();
             }
-            sr.Close();
-             
-        }
-        public ClassMovieMaker(String dirTo, String fileName, String d, int w, int h, Boolean t, String b, Boolean r)
-        {
-            outDir = dirTo;
-            rotate = r;
-            dataFile = d;
-            width = w * multBy;
-            height = h * multBy;
-            adults = t;
-            colorType =Color.Blue;
-            colorTypeDesc = b;
-            colorOtherType = Color.Red;
-            //blueType = b;
-            //using (
-            StreamReader sr = new StreamReader(dataFile);//)
-            {
-                sr.ReadLine();
-                while ((!sr.EndOfStream))
-                {
-                    ClassMovieMaker2("PLEAP_02_20_2019RLPART", ref sr);// "PLEAP_01_23_2019RLPARTS", sr);
-                }
-            }
-            sr.Close();
+
 
         }
-
-
         public void ClassMovieMaker2(String fileName, ref StreamReader sr)
         {
             DateTime currentTime = new DateTime();
@@ -101,7 +89,7 @@ namespace MovieTest
             {
                 szfileNames = szfileNames + (szfileNames == "" ? "" : "|") + fileName + (rotate ? "" : "NO") + random + "ROTATE__fr_40_PART" + part + ".avi";
                 String outputFileName = outDir + fileName + (rotate ? "" : "NO") + random + "ROTATE__fr_" + framRate + "_PART" + part + ".avi";
-                  
+
                 vFWriter.Open(outputFileName, width, height, framRate, VideoCodec.MPEG4);
                 {
                     linePos++;
@@ -146,20 +134,20 @@ namespace MovieTest
                         }
                     }
 
-;                }
+;
+                }
                 fileNames.Add(outputFileName);
 
             }
             catch (Exception e)
             {//24355 75000 6506
-                 linePos = linePos;
-                
+                linePos = linePos;
+
             }
 
-            
+
 
         }
-       
         public void drawTriangles(Dictionary<String, String[]> personPos, ref VideoFileWriter vFWriter, DateTime currentTime)
         {
             Bitmap bmp = new Bitmap(height, width, PixelFormat.Format24bppRgb);
@@ -171,7 +159,7 @@ namespace MovieTest
 
             foreach (String k in personPos.Keys)
             {
-                Tuple<PointF , PointF , PointF, PointF, PointF, PointF, PointF> pd = getTrianglePoints(personPos[k], triangleBaseLength);
+                Tuple<PointF, PointF, PointF, PointF, PointF, PointF, PointF> pd = getTrianglePoints(personPos[k], triangleBaseLength);
                 drawLineTriangle(personPos[k], pd, ref g);
             }
 
@@ -180,14 +168,9 @@ namespace MovieTest
             bmp.Dispose();
             g.Dispose();
         }
-       
-        public Tuple<PointF, PointF, PointF, PointF, PointF, PointF, PointF> getTrianglePoints(String[] line)
-        {
-            return getTrianglePoints(line, triangleBaseLength);
-        }
         public Tuple<PointF, PointF, PointF, PointF, PointF, PointF, PointF> getTrianglePoints(String[] line, double tb)
         {
-           
+
             //LEFT
             float xl = float.Parse(line[11]);
             float yl = float.Parse(line[12]);
@@ -219,7 +202,7 @@ namespace MovieTest
 
             PointF pln = new PointF((float)new_xl, (float)new_yl);
             PointF prn = new PointF((float)new_xr, (float)new_yr);
-           
+
             //TOP
             PointF pt = getTriangleHead(pln, prn, pc, triangleHeight);
 
@@ -262,7 +245,7 @@ namespace MovieTest
             float xln = (float)(xc - tb * (Math.Sqrt(1 / (1 + (m * m)))));
             float yln = (float)(yc - (m * tb) * (Math.Sqrt(1 / (1 + (m * m)))));
             PointF pln = new PointF((float)xln, (float)yln);
-          
+
             //NEW RIGHT
             float xrn = (float)(xc + tb * (Math.Sqrt(1 / (1 + (m * m)))));
             float yrn = (float)(yc + (m * tb) * (Math.Sqrt(1 / (1 + (m * m)))));
@@ -272,10 +255,10 @@ namespace MovieTest
             PointF pt = getTriangleHead(pln, prn, pc, triangleHeight);
 
             //HEAD
-            PointF ph = getTriangleHead(pln, prn, pc, triangleHeight+circleHeadRadius);
-            
+            PointF ph = getTriangleHead(pln, prn, pc, triangleHeight + circleHeadRadius);
+
             //NAME
-            PointF pn = getTriangleHead(pln, prn, pc, (triangleHeight/2));
+            PointF pn = getTriangleHead(pln, prn, pc, (triangleHeight / 2));
 
             //MIDDLE
             PointF pm = getTriangleHead(pln, prn, pc, (triangleHeight / 4));
@@ -300,11 +283,11 @@ namespace MovieTest
 
             //(triangleBaseLength + (circleHeadRadius * 2)) - Math.Pow((pl.Y - pr.Y), 2) = Math.Pow((pl.X - pr.X), 2);
             double hr = h / Math.Sqrt(Math.Pow((pc.Y - pr.Y), 2) + Math.Pow((pr.X - pc.X), 2));
-            double cr = triangleBaseLength / (triangleBaseLength+(circleHeadRadius*2));
-            if(pl.X<pr.X)
+            double cr = triangleBaseLength / (triangleBaseLength + (circleHeadRadius * 2));
+            if (pl.X < pr.X)
                 pl.X = (float)(pl.X - (pl.X * cr));
             else
-                pr.X = (float)(pr.X +- (pr.X * cr));
+                pr.X = (float)(pr.X + -(pr.X * cr));
 
             if (pl.Y < pr.Y)
                 pl.Y = (float)(pl.Y - (pl.Y * cr));
@@ -315,14 +298,14 @@ namespace MovieTest
             double dy = (pr.X - pl.X) / 2;
             double nx = pc.X + dx * hr;
             double ny = pc.Y + dy * hr;
-            return getTriangleHead( pl, pr,  pc, h+(circleHeadRadius*2));
+            return getTriangleHead(pl, pr, pc, h + (circleHeadRadius * 2));
 
         }
         public void drawLineTriangle(String[] line, Tuple<PointF, PointF, PointF, PointF, PointF, PointF, PointF> ps, ref Graphics g)
         {
             String name = line[0].Trim();
             if (name.IndexOf("_ORIGINAL") >= 0)
-                name = name.Replace("_ORIGINAL","");
+                name = name.Replace("_ORIGINAL", "");
             if (name.IndexOf("_") >= 0)
                 name = name.Substring(name.LastIndexOf("_") + 1);
             String type = line[6].Trim();
@@ -363,20 +346,20 @@ namespace MovieTest
                 //(adult ? Brushes.Green : line[6].Trim() == blueType ? Brushes.Blue : Brushes.Red)
                 //g.DrawString("L", new Font("Times New Roman", 14.0f), Brushes.Black, pl.X, pl.Y + 5);
                 //g.DrawString("R", new Font("Times New Roman", 14.0f), Brushes.Black, pr.X, pr.Y + 5);
-                Pen pen     = new Pen((adult ? Color.Green : line[6].Trim() == colorTypeDesc || line[6].Trim().ToUpper() == colorTypeDesc ? colorType : colorOtherType), (float)triangleBorderWidth);
+                Pen pen = new Pen((adult ? Color.Green : line[6].Trim() == colorTypeDesc || line[6].Trim().ToUpper() == colorTypeDesc ? colorType : colorOtherType), (float)triangleBorderWidth);
                 Brush brush = (adult ? Brushes.Green : line[6].Trim() == colorTypeDesc || line[6].Trim().ToUpper() == colorTypeDesc ? color1 : color2);
 
-                g.DrawPolygon(pen , new PointF[] { pl, pt, pr, pm });
+                g.DrawPolygon(pen, new PointF[] { pl, pt, pr, pm });
                 //g.FillEllipse(brush, ph.X, ph.Y, (float)(circleHeadRadius * 200), (float)(circleHeadRadius * 200));
                 if (talking)
                 {
-                    g.FillPolygon((adult ? Brushes.Green : line[6].Trim() == colorTypeDesc || line[6].Trim().ToUpper() == colorTypeDesc ? color1 : color2) , new PointF[] { pl, pt, pr, pm });
+                    g.FillPolygon((adult ? Brushes.Green : line[6].Trim() == colorTypeDesc || line[6].Trim().ToUpper() == colorTypeDesc ? color1 : color2), new PointF[] { pl, pt, pr, pm });
                 }
                 g.DrawString(name, new Font("Times New Roman", 16.0f, FontStyle.Bold), Brushes.Black, pn.X, pn.Y);
 
             }
         }
-  
+
         public Boolean isAdult(String k)
         {
             return (k.StartsWith("L") || k.StartsWith("T") || k.Contains("_T") || k.Contains("_L"));//FIX
@@ -387,5 +370,7 @@ namespace MovieTest
             p.X = p.X * multBy;
             p.Y = height - (p.Y * multBy);
         }
+
+
     }
 }
