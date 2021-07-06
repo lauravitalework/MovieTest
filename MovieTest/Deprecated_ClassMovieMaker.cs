@@ -11,7 +11,7 @@ using System.Drawing.Imaging;
 
 namespace MovieTest
 {
-    public class ClassMovieMaker
+    public class Deprecated_ClassMovieMaker
     {
         String dataFile; int width; int height; Boolean adults;
          
@@ -36,10 +36,10 @@ namespace MovieTest
         public String szfileNames = "";
          
         int random = new Random().Next();
-        public ClassMovieMaker( )
+        public Deprecated_ClassMovieMaker( )
         {
         }
-        public ClassMovieMaker(String dirTo, String fileName, String d, int w, int h, Boolean t, String ctd, Color ct, Boolean r)
+        public Deprecated_ClassMovieMaker(String dirTo, String fileName, String d, int w, int h, Boolean t, String ctd, Color ct, Boolean r)
         {
             outDir = dirTo;
             rotate = r;
@@ -64,7 +64,7 @@ namespace MovieTest
             sr.Close();
              
         }
-        public ClassMovieMaker(String dirTo, String fileName, String d, int w, int h, Boolean t, String b, Boolean r)
+        public Deprecated_ClassMovieMaker(String dirTo, String fileName, String d, int w, int h, Boolean t, String b, Boolean r)
         {
             outDir = dirTo;
             rotate = r;

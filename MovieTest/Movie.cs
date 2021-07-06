@@ -45,7 +45,7 @@ namespace MovieTest
         int random = new Random().Next();
 
 
-        public Movie(String[] szDays1, String cotalkVersion1, String cotalkDir1,String movieDir,String d, int w, int h, Boolean t, String ctd, Color ct, Boolean r)
+        public Movie(String[] szDays1, String cotalkVersion1, String cotalkDir1,String movieDir,int w, int h, Boolean t, String ctd, Color ct, Boolean r)
         {
             szDays = szDays1;
             cotalkVersion = cotalkVersion1;
@@ -64,13 +64,14 @@ namespace MovieTest
 
             foreach (String day in szDays)
             {
-                String dataFile = cotalkDir + "DAYCOTALK_" + Program.szDay(day) + version + ".CSV";
+                String dataFile = cotalkDir + "DAYCOTALK_" + Program.szDay(day) + cotalkVersion + ".CSV";
+                String fileName= "SF21_" + day;
                 StreamReader sr = new StreamReader(dataFile);
                 {
                     sr.ReadLine();
                     while ((!sr.EndOfStream))
                     {
-                       // ClassMovieMaker2(fileName, ref sr);
+                       ClassMovieMaker2(fileName, ref sr);
                     }
                 }
                 sr.Close();
@@ -87,8 +88,8 @@ namespace MovieTest
             var framRate = 40;
             try
             {
-                szfileNames = szfileNames + (szfileNames == "" ? "" : "|") + fileName + (rotate ? "" : "NO") + random + "ROTATE__fr_40_PART" + part + ".avi";
-                String outputFileName = outDir + fileName + (rotate ? "" : "NO") + random + "ROTATE__fr_" + framRate + "_PART" + part + ".avi";
+                String outputFileName = outDir + fileName + (rotate ? "" : "NO") + random + "ROTATE__fr_" + framRate +"_"+version+ "_PART" + part + ".avi";
+                szfileNames = szfileNames + (szfileNames == "" ? "" : "|") + fileName + (rotate ? "" : "NO") + random + "ROTATE__fr_" + framRate + "_" + version + "_PART" + part + ".avi";
 
                 vFWriter.Open(outputFileName, width, height, framRate, VideoCodec.MPEG4);
                 {
@@ -113,6 +114,10 @@ namespace MovieTest
                             }
                             if (lineTime.CompareTo(currentTime) != 0 || lineTime.Millisecond != currentTime.Millisecond)
                             {
+                                if(line[6].Trim()!="")
+                                {
+                                    bool stop = true;
+                                }
                                 drawTriangles(personPos, ref vFWriter, currentTime);
                                 personPos = new Dictionary<string, string[]>();
 
@@ -346,14 +351,14 @@ namespace MovieTest
                 //(adult ? Brushes.Green : line[6].Trim() == blueType ? Brushes.Blue : Brushes.Red)
                 //g.DrawString("L", new Font("Times New Roman", 14.0f), Brushes.Black, pl.X, pl.Y + 5);
                 //g.DrawString("R", new Font("Times New Roman", 14.0f), Brushes.Black, pr.X, pr.Y + 5);
-                Pen pen = new Pen((adult ? Color.Green : line[6].Trim() == colorTypeDesc || line[6].Trim().ToUpper() == colorTypeDesc ? colorType : colorOtherType), (float)triangleBorderWidth);
-                Brush brush = (adult ? Brushes.Green : line[6].Trim() == colorTypeDesc || line[6].Trim().ToUpper() == colorTypeDesc ? color1 : color2);
+                Pen pen = new Pen((adult ? Color.Green : line[6].Trim().ToUpper() == colorTypeDesc.ToUpper() ? colorType : colorOtherType), (float)triangleBorderWidth);
+                Brush brush = (adult ? Brushes.Green : line[6].Trim().ToUpper() == colorTypeDesc.ToUpper() ? color1 : color2);
 
                 g.DrawPolygon(pen, new PointF[] { pl, pt, pr, pm });
                 //g.FillEllipse(brush, ph.X, ph.Y, (float)(circleHeadRadius * 200), (float)(circleHeadRadius * 200));
                 if (talking)
                 {
-                    g.FillPolygon((adult ? Brushes.Green : line[6].Trim() == colorTypeDesc || line[6].Trim().ToUpper() == colorTypeDesc ? color1 : color2), new PointF[] { pl, pt, pr, pm });
+                    g.FillPolygon((adult ? Brushes.Green : line[6].Trim().ToUpper() == colorTypeDesc.ToUpper() ? color1 : color2), new PointF[] { pl, pt, pr, pm });
                 }
                 g.DrawString(name, new Font("Times New Roman", 16.0f, FontStyle.Bold), Brushes.Black, pn.X, pn.Y);
 
