@@ -45,8 +45,9 @@ namespace MovieTest
         int random = new Random().Next();
 
 
-        public Movie(String[] szDays1, String cotalkVersion1, String cotalkDir1,String movieDir,int w, int h, Boolean t, String ctd, Color ct, Boolean r)
+        public Movie(String classFileName,String[] szDays1, String cotalkVersion1,String cotalkPrefix, String cotalkDir1,String movieDir,int w, int h, Boolean t, String ctd, Color ct, Boolean r)
         {
+            part = 1;
             szDays = szDays1;
             cotalkVersion = cotalkVersion1;
             cotalkDir = cotalkDir1;
@@ -57,21 +58,66 @@ namespace MovieTest
             height = h * multBy;
             adults = t;
             colorTypeDesc = ctd;
-            colorOtherType = ct == Color.Red ? Color.Blue : Color.Red;
-            colorType = ct; 
+            colorType = ct;
+            colorOtherType = (ct == Color.Red ? Color.Blue : Color.Red);
             version = DateTime.Now.Month.ToString().ToString() + DateTime.Now.Day.ToString() + DateTime.Now.Year.ToString()+"_"+random;
 
 
             foreach (String day in szDays)
             {
-                String dataFile = cotalkDir + "DAYCOTALK_" + Program.szDay(day) + cotalkVersion + ".CSV";
-                String fileName= "SF21_" + day;
+                String dataFile = cotalkDir + cotalkPrefix + Program.szDay(day) + cotalkVersion + ".CSV";
+                if(!File.Exists(dataFile))
+                {
+                    dataFile = cotalkDir + cotalkPrefix + day + cotalkVersion + ".CSV";
+                }
+                String fileName= classFileName+"_" + day;
                 StreamReader sr = new StreamReader(dataFile);
                 {
                     sr.ReadLine();
                     while ((!sr.EndOfStream))
                     {
                        ClassMovieMaker2(fileName, ref sr);
+                    }
+                }
+                sr.Close();
+            }
+
+
+        }
+        public int icolColor = 6;
+        public Movie(String classFileName, String[] szDays1, String cotalkVersion1, String cotalkPrefix, String cotalkDir1, String movieDir, int w, int h, Boolean t, String ctd, Color ct, Boolean r, int colColor)
+        {
+            icolColor = colColor;
+            part = 1;
+            szDays = szDays1;
+            cotalkVersion = cotalkVersion1;
+            cotalkDir = cotalkDir1;
+
+            outDir = movieDir;
+            rotate = r;
+            width = w * multBy;
+            height = h * multBy;
+            adults = t;
+            colorTypeDesc = ctd;
+            colorType = ct;
+            colorOtherType = (ct == Color.Red ? Color.Blue : Color.Red);
+            version = DateTime.Now.Month.ToString().ToString() + DateTime.Now.Day.ToString() + DateTime.Now.Year.ToString() + "_" + random;
+
+
+            foreach (String day in szDays)
+            {
+                String dataFile = cotalkDir + cotalkPrefix + Program.szDay(day) + cotalkVersion + ".CSV";
+                if (!File.Exists(dataFile))
+                {
+                    dataFile = cotalkDir + cotalkPrefix + day + cotalkVersion + ".CSV";
+                }
+                String fileName = classFileName + "_" + day;
+                StreamReader sr = new StreamReader(dataFile);
+                {
+                    sr.ReadLine();
+                    while ((!sr.EndOfStream))
+                    {
+                        ClassMovieMaker2(fileName, ref sr);
                     }
                 }
                 sr.Close();
@@ -114,7 +160,7 @@ namespace MovieTest
                             }
                             if (lineTime.CompareTo(currentTime) != 0 || lineTime.Millisecond != currentTime.Millisecond)
                             {
-                                if(line[6].Trim()!="")
+                                if(line[icolColor].Trim()!="")
                                 {
                                     bool stop = true;
                                 }
@@ -313,7 +359,7 @@ namespace MovieTest
                 name = name.Replace("_ORIGINAL", "");
             if (name.IndexOf("_") >= 0)
                 name = name.Substring(name.LastIndexOf("_") + 1);
-            String type = line[6].Trim();
+            String type = line[icolColor].Trim();
             Boolean talking = line[5].Trim() == "True";
 
             PointF pl = ps.Item1;
@@ -348,17 +394,20 @@ namespace MovieTest
             if ((!adult) || adults)
             {
                 //g.DrawLine(new Pen(Color.DarkGray, 20), pl, pr);
-                //(adult ? Brushes.Green : line[6].Trim() == blueType ? Brushes.Blue : Brushes.Red)
+                //(adult ? Brushes.Green : line[icolColor].Trim() == blueType ? Brushes.Blue : Brushes.Red)
                 //g.DrawString("L", new Font("Times New Roman", 14.0f), Brushes.Black, pl.X, pl.Y + 5);
                 //g.DrawString("R", new Font("Times New Roman", 14.0f), Brushes.Black, pr.X, pr.Y + 5);
-                Pen pen = new Pen((adult ? Color.Green : line[6].Trim().ToUpper() == colorTypeDesc.ToUpper() ? colorType : colorOtherType), (float)triangleBorderWidth);
-                Brush brush = (adult ? Brushes.Green : line[6].Trim().ToUpper() == colorTypeDesc.ToUpper() ? color1 : color2);
-
+                Pen pen = new Pen((adult ? Color.Green :( colorTypeDesc!="" && line[icolColor].Trim().ToUpper().Contains(colorTypeDesc.ToUpper())) || (colorTypeDesc == "" && line[icolColor].Trim()=="") ? colorType : colorOtherType), (float)triangleBorderWidth);
+                Brush brush = (adult ? Brushes.Green : (colorTypeDesc != "" && line[icolColor].Trim().ToUpper().Contains(colorTypeDesc.ToUpper())) || (colorTypeDesc == "" && line[icolColor].Trim() == "") ? color1 : color2);
+                if((!adult) && line[icolColor].Trim().ToUpper()!="F")
+                {
+                    bool stop = true;
+                }
                 g.DrawPolygon(pen, new PointF[] { pl, pt, pr, pm });
                 //g.FillEllipse(brush, ph.X, ph.Y, (float)(circleHeadRadius * 200), (float)(circleHeadRadius * 200));
                 if (talking)
                 {
-                    g.FillPolygon((adult ? Brushes.Green : line[6].Trim().ToUpper() == colorTypeDesc.ToUpper() ? color1 : color2), new PointF[] { pl, pt, pr, pm });
+                    g.FillPolygon((adult ? Brushes.Green : line[icolColor].Trim().ToUpper().Contains(colorTypeDesc.ToUpper()) ? color1 : color2), new PointF[] { pl, pt, pr, pm });
                 }
                 g.DrawString(name, new Font("Times New Roman", 16.0f, FontStyle.Bold), Brushes.Black, pn.X, pn.Y);
 

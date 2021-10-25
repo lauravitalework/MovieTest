@@ -25,9 +25,47 @@ namespace MovieTest
 
         static void Main(string[] args)
         {
+            String days = "";
+            Movie m;
+            //_7_22_2020_1260238996
+
+            /******AT1920*******/
+            days = "9_19_2019,9_19_2019";
+             m = new Movie("LR_AT_1920", days.Split(','), "_7_22_2020_1260238996", "10THOFSECTALKINGDETAIL_", "E://CLASSROOMS1920//AppleTree_1920//SYNC//", "F://MOVIES//", 9, 9, true, "F", Color.Red, true, 7);
+            /******AT1920*******/
+
+
+            /******LB1819*******/
+            days = "10_3_2018,10_8_2018,11_28_2018,12_4_2018,1_8_2019,1_15_2019,2_5_2019,3_6_2019,3_15_2019,5_7_2019,5_14_2019,5_24_2019";
+           // m = new Movie("DB_LB_1819", days.Split(','), "_10_15_2020_1592669264", "10THOFSECTALKINGDETAIL_", "F://LB1819//", "F://MOVIES//", 9, 9, true, "TYPICAL", Color.Red, true);
+            /******LB1819*******/
+             
+            /******LB1718*******/
+            days = "10_24_2017,11_3_2017,11_17_2017,12_14_2017,1_11_2018,2_2_2018,2_16_2018,3_13_2018,3_20_2018,5_1_2018,5_16_2018";
+            m = new Movie("DB_LB_1718", days.Split(','), "_7_10_2019_460388974", "10THOFSECTALKING_", "F://LB1718//", "F://MOVIES//", 9, 9, true, "", Color.Red, true);
+            /******LB1718*******/
+
+            /******PR_RA_1819*******/
+            days = "3_1_2019,3_19_2019,4_24_2019"; ;// "1_30_2019,3_1_2019,3_19_2019,4_24_2019,5_28_2019";
+          //  m = new Movie("PR_RA_1819", days.Split(','), "_4_21_2021_2010052710", "10THOFSECTALKINGDETAIL_", "D://CLASSROOMS_OLD//PRIDE_REVM//PRIDE_REVM_AM//SYNC//", "F://MOVIES//", 9, 9, true, "TD", Color.Red, true);
+            /******PR_RA_1819*******/
+
+
+            //_3_28_2021_187694180 10THOFSECTALKINGDETAIL
+            /******AVENGERS1920*******/
+            //  days = "1_23_2020,2_18_2020";
+            // m = new Movie("TA1920",days.Split(','), "_3_26_2021_1491103679", "10THOFSECTALKINGDETAIL_", "E://CLASSROOMS1920//AVENGERS_1920//SYNC//", "E://MOVIES//", 10, 10, true, "TD", Color.Red, true);
+            /******AVENGERS1920*******/
+
+            /******TURTLES1920*******/
+            days = "2_12_2020,11_13_2019";//,12_6_2019,1_24_2020,2_12_2020";
+            m = new Movie("TT1920", days.Split(','), "_3_28_2021_187694180", "10THOFSECTALKINGDETAIL_", "E://CLASSROOMS1920//TURTLES_1920//SYNC//", "E://MOVIES//", 10, 10, true, "TD", Color.Red, true);
+            /******TURTLES1920*******/
+
+
             /******STARFISH2021*******/
-            String days = "4_6_2021,3_16_2021,4_13_2021,4_27_2021,5_20_2021,5_25_2021,6_8_2021";
-            Movie SF21 = new Movie(days.Split(','), "_GR0_22_5_070621_1908535299", "E://StarFish_2021//SYNC//COTALK//", "E://MOVIES//", 16,16,true, "Typical", Color.Red, true);
+            days = "4_6_2021,3_16_2021,4_13_2021,4_27_2021,5_20_2021,5_25_2021,6_8_2021";
+            m = new Movie("DS2021", days.Split(','), "_GR0_22_5_070621_1908535299", "DAYCOTALK_", "E://StarFish_2021//SYNC//COTALK//", "E://MOVIES//", 16,16,true, "Typical", Color.Red, true);
             /******STARFISH2021*******/
         }
 
